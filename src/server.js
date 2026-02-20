@@ -7,7 +7,7 @@ urlStruct = {
 };
 
 const onRequest = (request, response) => {
-
+    
 };
 
 http.createServer(onRequest).listen(port, () => {
