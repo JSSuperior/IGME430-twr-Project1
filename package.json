@@ -1,0 +1,26 @@
+{
+  "name": "igme430-twr-project1",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/server.js ",
+    "pretest": "eslint ./src --fix",
+    "test": "echo \"Tests complete\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JSSuperior/IGME430-twr-Project1.git"
+  },
+  "author": "JSSuperior",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JSSuperior/IGME430-twr-Project1/issues"
+  },
+  "homepage": "https://github.com/JSSuperior/IGME430-twr-Project1#readme",
+  "description": "",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.0.1",
+    "globals": "^17.3.0"
+  }
+}
