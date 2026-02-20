@@ -38,5 +38,6 @@ const parseBody = (request, response, handler) => {
 
 // Starts server
 http.createServer(onRequest).listen(port, () => {
+    jsonHandler.loadJSON();
     console.log(`Listening on 127.0.0.1${port}`);
 });

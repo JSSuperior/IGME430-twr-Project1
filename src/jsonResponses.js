@@ -1,13 +1,15 @@
 const fs = require('fs');
 const initialData = fs.readFileSync(`${__dirname}/../data/books.json`);
 
-// I wonder if I can just straight up stick the loading in the file here
-// or if i need to make a method for it and then call it in server.js
-// could also be that I can directly read and access initialData
-// need to test also im probably too tired to think straight
+// Local storage of json data
+let data;
 
-// Gonna load in data to start, might change later
-const data = {};
+// Loads json data into local memory
+const loadJSON = () => {
+    data = JSON.parse(initialData);
+    //console.log(data);
+    //console.log(data[0]);
+};
 
 const respond = (request, response, statusCode, object) => {
     const content = JSON.stringify(object);
@@ -26,7 +28,30 @@ const respond = (request, response, statusCode, object) => {
     response.end();
 };
 
+const getAuthor = (request, response) => {
+    const responseJSON = {};
+    let statusCode = 200;
 
+    // double check if the second query is needed
+    if(!request.query.title || request.query.title === null) {
+        responseJSON.id = 'badRequest';
+        responseJSON.message = 'Missing valid query parameter.';
+        statusCode = 400;
+        return respond(request, response, statusCode, responseJSON);
+    }
+
+    // need to search for proper entry
+    //responseJSON.message = 
+        
+};
+
+// Gets all entries
+const getAllEntries = () => {
+    const responseJSON = {data};
+    const statusCode = 200;
+
+    return respond(request, response, statusCode, responseJSON);
+};
 
 // Page not found
 const notFound = (request, response) => {
@@ -40,5 +65,7 @@ const notFound = (request, response) => {
 };
 
 module.exports = {
+    loadJSON,
+    getAllEntries,
     notFound,
 };
