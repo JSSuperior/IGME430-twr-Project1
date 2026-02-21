@@ -8,10 +8,13 @@ const htmlHandler = require('./htmlResponses.js');
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 // URLs
+// need to find better names based on what they return
 const urlStruct = {
     '/': htmlHandler.getClient,
     '/style.css': htmlHandler.getCSS,
-    '/getByTitle': jsonHandler.getByTitle,
+    '/getByTitleAuthor': jsonHandler.getByTitleAuthor,
+    '/getByGenre': jsonHandler.getByGenre,
+    '/getByYear': jsonHandler.getByYear,
     '/getAllEntries': jsonHandler.getAllEntries,
     notFound: jsonHandler.notFound,
 };
