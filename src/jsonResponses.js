@@ -204,10 +204,34 @@ const addBook = (request, response) => {
     return respond(request, response, statusCode, {});
 }
 
-const addRating = () => {
+// Adds a new field to book entries
+const addRating = (request, response) => {
     // needs rating out of 5
+    const responseJSON = {
+        message: 'Name and rating is required.',
+    };
+    let statusCode = 400;
 
+    const {title, rating} = request.body;
+    if(!title || !rating) {
+        responseJSON.id = 'addRatingMissingParams';
+        return respond(request, response, statusCode, responseJSON);
+    }
 
+    statusCode = 404;
+    for(let i = 0; i < data.length; i++) {
+        if(data[i]['title'].replace(/\s/g, '').toLowerCase === title.replace(/\s/g, '').toLowerCase()) {
+            statusCode = 204;
+            data[i]['rating'] = rating;
+        }
+    }
+
+    if(statusCode === 404){
+        responseJSON.id = 'titleNotFound';
+        responseJSON.message = 'Title of book was not found.';
+        return respond(request, response, statusCode, responseJSON);
+    }
+    return respond(request, response, statusCode, responseJSON);
 }
 
 // Page not found
@@ -227,5 +251,7 @@ module.exports = {
     getByGenre,
     getByYear,
     getAllEntries,
+    addBook,
+    addRating,
     notFound,
 };

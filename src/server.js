@@ -16,6 +16,8 @@ const urlStruct = {
     '/getByGenre': jsonHandler.getByGenre,
     '/getByYear': jsonHandler.getByYear,
     '/getAllEntries': jsonHandler.getAllEntries,
+    '/addBook': jsonHandler.addBook,
+    '/addRating': jsonHandler.addRating,
     notFound: jsonHandler.notFound,
 };
 
