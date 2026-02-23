@@ -33,35 +33,35 @@ const respond = (request, response, statusCode, object) => {
     response.end();
 };
 
-// Gets all book titles written by specific authors
-
 // Returns book info given title and Author
 const getByTitleAuthor = (request, response) => {
-    let responseJSON = {};
-    let statusCode;
-
     // If missing query return bad request
     if (!request.query.title || !request.query.author) {
-        responseJSON.id = 'badRequest';
-        responseJSON.message = 'Missing valid query parameter.';
-        statusCode = 400;
-        return respond(request, response, statusCode, responseJSON);
+        return badRequest(request, response);
     }
 
     // Default to not found
-    responseJSON = {
+    let responseJSON = {
         id: 'bookNotFound',
         message: `No book with title and author: ${request.query.title},${request.query.author}`
     }
-    statusCode = 404;
+    let statusCode = 404;
 
     // Go through data and check if a book with a certain title
-    for (let i = 0; i < data.length; i++) {
-        if (data[i]['title'].replace(/\s/g, '') === request.query.title && data[i]['author'].replace(/\s/g, '') === request.query.author) {
+    for (let book of data) {
+        if (book['title'].replace(/\s/g, '').toLowerCase() === request.query.title
+            && book['author'].replace(/\s/g, '').toLowerCase() === request.query.author) {
             statusCode = 200;
-            responseJSON = data[i];
+            responseJSON = book;
         }
     }
+
+    // for (let i = 0; i < data.length; i++) {
+    //     if (data[i]['title'].replace(/\s/g, '') === request.query.title && data[i]['author'].replace(/\s/g, '') === request.query.author) {
+    //         statusCode = 200;
+    //         responseJSON = data[i];
+    //     }
+    // }
 
     return respond(request, response, statusCode, responseJSON);
 };
@@ -70,43 +70,55 @@ const getByTitleAuthor = (request, response) => {
 // Returns book titles that have specific genre
 // later on, might change to search for multiple at a time
 const getByGenre = (request, response) => {
-    let responseJSON = {};
-    let statusCode;
-
     // If missing query return bad request
     if (!request.query.genre) {
-        responseJSON.id = 'badRequest';
-        responseJSON.message = 'Missing valid query parameter.';
-        statusCode = 400;
-        return respond(request, response, statusCode, responseJSON);
+        return badRequest(request, response);
     }
 
     // Default to not found
-    responseJSON = {
+    let responseJSON = {
         id: 'bookNotFound',
         message: `No book(s) with genre: ${request.query.genre}`
     }
-    statusCode = 404;
+    let statusCode = 404;
 
     // http://127.0.0.1:3000/getByGenre?genre=Modernism
     // Go through data and check if books with a certain genre exist and add them to a lsit
     let booksWithGenre = [];
-    for (let i = 0; i < data.length; i++) {
-        if (data[i]['genres']) {
-            for (let j = 0; j < data[i]['genres'].length; j++) {
-                //console.log(data[i]['genres'][j].replace(/\s/g, ''));
-                if (data[i]['genres'][j].replace(/\s/g, '') === request.query.genre) {
+    for (let book of data) {
+        if (book['genres']) {
+            for (let genre of book['genres']) {
+                if (genre.replace(/\s/g, '').toLowerCase() === request.query.genre) {
                     let bookStruct = {};
 
-                    bookStruct.title = data[i]['title'];
-                    bookStruct.author = data[i]['author'];
-                    bookStruct.link = data[i]['link'];
+                    bookStruct.title = book['title'];
+                    bookStruct.author = book['author'];
+                    bookStruct.link = book['link'];
 
                     booksWithGenre.push(bookStruct);
                 }
             }
         }
     }
+
+
+
+    // for (let i = 0; i < data.length; i++) {
+    //     if (data[i]['genres']) {
+    //         for (let j = 0; j < data[i]['genres'].length; j++) {
+    //             //console.log(data[i]['genres'][j].replace(/\s/g, ''));
+    //             if (data[i]['genres'][j].replace(/\s/g, '') === request.query.genre) {
+    //                 let bookStruct = {};
+
+    //                 bookStruct.title = data[i]['title'];
+    //                 bookStruct.author = data[i]['author'];
+    //                 bookStruct.link = data[i]['link'];
+
+    //                 booksWithGenre.push(bookStruct);
+    //             }
+    //         }
+    //     }
+    // }
 
     // If books with specific genre exist, send the titles
     if (booksWithGenre.length > 0) {
@@ -120,32 +132,34 @@ const getByGenre = (request, response) => {
 // http://127.0.0.1:3000/getByYear?yearMin=1700&yearMax=2000
 // Gets books in a range of years
 const getByYear = (request, response) => {
-    let responseJSON = {};
-    let statusCode;
-
     // If missing query return bad request
     if (!request.query.yearMin || !request.query.yearMax) {
-        responseJSON.id = 'badRequest';
-        responseJSON.message = 'Missing valid query parameter.';
-        statusCode = 400;
-        return respond(request, response, statusCode, responseJSON);
+        return badRequest(request, response);
     }
 
     // Default to not found
-    responseJSON = {
+    let responseJSON = {
         id: 'booksNotFound',
         message: `No book(s) within the time range: ${request.query.yearmin}-${request.query.yearMax}`
     }
-    statusCode = 404;
+    let statusCode = 404;
 
     // Go through data and check if books with a certain genre exist and add them to a lsit
     let booksWithYear = [];
-    for (let i = 0; i < data.length; i++) {
-        //console.log(data[i]['genres'][j].replace(/\s/g, ''));
-        if (data[i]['year'] >= request.query.yearMin && data[i]['year'] <= request.query.yearMax) {
-            booksWithYear.push(data[i]['title']);
+
+    for (let book of data) {
+        if (book['year'] >= request.query.yearMin
+            && book['year'] <= request.query.yearMax) {
+            booksWithYear.push(book['title']);
         }
     }
+
+    // for (let i = 0; i < data.length; i++) {
+    //     //console.log(data[i]['genres'][j].replace(/\s/g, ''));
+    //     if (data[i]['year'] >= request.query.yearMin && data[i]['year'] <= request.query.yearMax) {
+    //         booksWithYear.push(data[i]['title']);
+    //     }
+    // }
 
     // If books within specified time range exist, send the titles
     if (booksWithYear.length > 0) {
@@ -171,33 +185,43 @@ const addBook = (request, response) => {
     };
     let statusCode = 400;
 
-    const {title, author, year, genres} = request.body;
-    if(!title || !author || !year || !genres) {
+    const { title, author, year, genres } = request.body;
+    if (!title || !author || !year || !genres) {
         responseJSON.id = 'addBookMissingParams';
         return respond(request, response, statusCode, responseJSON);
     }
 
     statusCode = 201;
     // im sure that there is a better ay to search, need to do more research
-    for(let i = 0; i < data.length; i++) {
-        if(data[i]['title'].replace(/\s/g, '').toLowerCase === title.replace(/\s/g, '').toLowerCase()) {
+    for (let book of data) {
+        if (book['title'].replace(/\s/g, '').toLowerCase() === title.replace(/\s/g, '').toLowerCase()) {
             statusCode = 204;
-            data[i]['title'] = title;
-            data[i]['author'] = author;
-            data[i]['year'] = year;
-            data[i]['genres'] = genres;
+            book['title'] = title;
+            book['author'] = author;
+            book['year'] = year;
+            book['genres'] = genres;
         }
     }
 
-    if(statusCode === 201){
-        const newUser = {};
+    // for (let i = 0; i < data.length; i++) {
+    //     if (data[i]['title'].replace(/\s/g, '').toLowerCase === title.replace(/\s/g, '').toLowerCase()) {
+    //         statusCode = 204;
+    //         data[i]['title'] = title;
+    //         data[i]['author'] = author;
+    //         data[i]['year'] = year;
+    //         data[i]['genres'] = genres;
+    //     }
+    // }
 
-        newUser.title = title;
-        newUser.author = author;
-        newUser.year = year;
-        newUser.genres = genres;
+    if (statusCode === 201) {
+        const newBook = {};
 
-        data.push(newUser);
+        newBook.title = title;
+        newBook.author = author;
+        newBook.year = year;
+        newBook.genres = genres;
+
+        data.push(newBook);
         responseJSON.message = 'New Book Entry Created';
         return respond(request, response, statusCode, responseJSON);
     }
@@ -212,21 +236,21 @@ const addRating = (request, response) => {
     };
     let statusCode = 400;
 
-    const {title, rating} = request.body;
-    if(!title || !rating) {
+    const { title, rating } = request.body;
+    if (!title || !rating) {
         responseJSON.id = 'addRatingMissingParams';
         return respond(request, response, statusCode, responseJSON);
     }
 
     statusCode = 404;
-    for(let i = 0; i < data.length; i++) {
-        if(data[i]['title'].replace(/\s/g, '').toLowerCase === title.replace(/\s/g, '').toLowerCase()) {
+    for (let i = 0; i < data.length; i++) {
+        if (data[i]['title'].replace(/\s/g, '').toLowerCase === title.replace(/\s/g, '').toLowerCase()) {
             statusCode = 204;
             data[i]['rating'] = rating;
         }
     }
 
-    if(statusCode === 404){
+    if (statusCode === 404) {
         responseJSON.id = 'titleNotFound';
         responseJSON.message = 'Title of book was not found.';
         return respond(request, response, statusCode, responseJSON);
@@ -244,6 +268,15 @@ const notFound = (request, response) => {
 
     return respond(request, response, statusCode, responseJSON);
 };
+
+const badRequest = (request, response) => {
+    const responseJSON = {};
+    const statusCode = 400;
+
+    responseJSON.id = 'badRequest';
+    responseJSON.message = 'Missing valid query parameter.';
+    return respond(request, response, statusCode, responseJSON);
+}
 
 module.exports = {
     loadJSON,
