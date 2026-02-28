@@ -48,20 +48,20 @@ const getByTitleAuthor = (request, response) => {
     let statusCode = 404;
 
     // Go through data and check if a book with a certain title
-    for (let book of data) {
-        if (book['title'].replace(/\s/g, '').toLowerCase() === request.query.title
-            && book['author'].replace(/\s/g, '').toLowerCase() === request.query.author) {
-            statusCode = 200;
-            responseJSON = book;
-        }
-    }
-
-    // for (let i = 0; i < data.length; i++) {
-    //     if (data[i]['title'].replace(/\s/g, '') === request.query.title && data[i]['author'].replace(/\s/g, '') === request.query.author) {
+    // for (let book of data) {
+    //     if (book['title'].replace(/\s/g, '').toLowerCase() === request.query.title
+    //         && book['author'].replace(/\s/g, '').toLowerCase() === request.query.author) {
     //         statusCode = 200;
-    //         responseJSON = data[i];
+    //         responseJSON = book;
     //     }
     // }
+
+    for (let i = 0; i < data.length; i++) {
+        if (data[i]['title'].replace(/\s/g, '') === request.query.title && data[i]['author'].replace(/\s/g, '') === request.query.author) {
+            statusCode = 200;
+            responseJSON = data[i];
+        }
+    }
 
     return respond(request, response, statusCode, responseJSON);
 };
@@ -85,40 +85,40 @@ const getByGenre = (request, response) => {
     // http://127.0.0.1:3000/getByGenre?genre=Modernism
     // Go through data and check if books with a certain genre exist and add them to a lsit
     let booksWithGenre = [];
-    for (let book of data) {
-        if (book['genres']) {
-            for (let genre of book['genres']) {
-                if (genre.replace(/\s/g, '').toLowerCase() === request.query.genre) {
-                    let bookStruct = {};
-
-                    bookStruct.title = book['title'];
-                    bookStruct.author = book['author'];
-                    bookStruct.link = book['link'];
-
-                    booksWithGenre.push(bookStruct);
-                }
-            }
-        }
-    }
-
-
-
-    // for (let i = 0; i < data.length; i++) {
-    //     if (data[i]['genres']) {
-    //         for (let j = 0; j < data[i]['genres'].length; j++) {
-    //             //console.log(data[i]['genres'][j].replace(/\s/g, ''));
-    //             if (data[i]['genres'][j].replace(/\s/g, '') === request.query.genre) {
+    // for (let book of data) {
+    //     if (book['genres']) {
+    //         for (let genre of book['genres']) {
+    //             if (genre.replace(/\s/g, '').toLowerCase() === request.query.genre) {
     //                 let bookStruct = {};
 
-    //                 bookStruct.title = data[i]['title'];
-    //                 bookStruct.author = data[i]['author'];
-    //                 bookStruct.link = data[i]['link'];
+    //                 bookStruct.title = book['title'];
+    //                 bookStruct.author = book['author'];
+    //                 bookStruct.link = book['link'];
 
     //                 booksWithGenre.push(bookStruct);
     //             }
     //         }
     //     }
     // }
+
+
+
+    for (let i = 0; i < data.length; i++) {
+        if (data[i]['genres']) {
+            for (let j = 0; j < data[i]['genres'].length; j++) {
+                //console.log(data[i]['genres'][j].replace(/\s/g, ''));
+                if (data[i]['genres'][j].replace(/\s/g, '') === request.query.genre) {
+                    let bookStruct = {};
+
+                    bookStruct.title = data[i]['title'];
+                    bookStruct.author = data[i]['author'];
+                    bookStruct.link = data[i]['link'];
+
+                    booksWithGenre.push(bookStruct);
+                }
+            }
+        }
+    }
 
     // If books with specific genre exist, send the titles
     if (booksWithGenre.length > 0) {
@@ -147,19 +147,19 @@ const getByYear = (request, response) => {
     // Go through data and check if books with a certain genre exist and add them to a lsit
     let booksWithYear = [];
 
-    for (let book of data) {
-        if (book['year'] >= request.query.yearMin
-            && book['year'] <= request.query.yearMax) {
-            booksWithYear.push(book['title']);
-        }
-    }
-
-    // for (let i = 0; i < data.length; i++) {
-    //     //console.log(data[i]['genres'][j].replace(/\s/g, ''));
-    //     if (data[i]['year'] >= request.query.yearMin && data[i]['year'] <= request.query.yearMax) {
-    //         booksWithYear.push(data[i]['title']);
+    // for (let book of data) {
+    //     if (book['year'] >= request.query.yearMin
+    //         && book['year'] <= request.query.yearMax) {
+    //         booksWithYear.push(book['title']);
     //     }
     // }
+
+    for (let i = 0; i < data.length; i++) {
+        //console.log(data[i]['genres'][j].replace(/\s/g, ''));
+        if (data[i]['year'] >= request.query.yearMin && data[i]['year'] <= request.query.yearMax) {
+            booksWithYear.push(data[i]['title']);
+        }
+    }
 
     // If books within specified time range exist, send the titles
     if (booksWithYear.length > 0) {
@@ -193,25 +193,25 @@ const addBook = (request, response) => {
 
     statusCode = 201;
     // im sure that there is a better ay to search, need to do more research
-    for (let book of data) {
-        if (book['title'].replace(/\s/g, '').toLowerCase() === title.replace(/\s/g, '').toLowerCase()) {
-            statusCode = 204;
-            book['title'] = title;
-            book['author'] = author;
-            book['year'] = year;
-            book['genres'] = genres;
-        }
-    }
-
-    // for (let i = 0; i < data.length; i++) {
-    //     if (data[i]['title'].replace(/\s/g, '').toLowerCase === title.replace(/\s/g, '').toLowerCase()) {
+    // for (let book of data) {
+    //     if (book['title'].replace(/\s/g, '').toLowerCase() === title.replace(/\s/g, '').toLowerCase()) {
     //         statusCode = 204;
-    //         data[i]['title'] = title;
-    //         data[i]['author'] = author;
-    //         data[i]['year'] = year;
-    //         data[i]['genres'] = genres;
+    //         book['title'] = title;
+    //         book['author'] = author;
+    //         book['year'] = year;
+    //         book['genres'] = genres;
     //     }
     // }
+
+    for (let i = 0; i < data.length; i++) {
+        if (data[i]['title'].replace(/\s/g, '').toLowerCase === title.replace(/\s/g, '').toLowerCase()) {
+            statusCode = 204;
+            data[i]['title'] = title;
+            data[i]['author'] = author;
+            data[i]['year'] = year;
+            data[i]['genres'] = genres;
+        }
+    }
 
     if (statusCode === 201) {
         const newBook = {};
