@@ -1,11 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>430 TWR Project 1</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-    <script></script>
+    <script>
+        const handleContent = async (response, parseResponse) => {
+            // Grab content element
+            const content = document.querySelector('#content');
+
+            // Display status code
+            switch (response.status) {
+                case 200:
+                    content.innerHTML = '<h1><b>Success</b></h1>';
+                    break;
+                case 201:
+                    content.innerHTML = '<h1><b>Created</b></h1>';
+                    break;
+                case 204:
+                    content.innerHTML = '<h1><b>Updated (No Content)</b></h1>';
+                    break;
+                case 400:
+                    content.innerHTML = '<h1><b>Bad Request</b></h1>';
+                    break;
+                case 404:
+                    content.innerHTML = '<h1><b>Not Found</b></h1>';
+                    break;
+                default:
+                    content.innerHTML = '<h1><b>Code Not Yet Implimented</b></h1>';
+                    break;
+            }
+
+            if (parseResponse !== 'head') {
+                try {
+                    let responseObj = await response.json();
+                    let jsonString = JSON.stringify(responseObj);
+
+                    // If a message exists, display it, otherwise display json string
+                    if (responseObj.message) {
+                        content.innerHTML += `<p>${responseObj.message}</p>`;
+                    }
+                    else {
+                        content.innerHTML += `<p>${jsonString}</p>`;
+                    }
+
+                } catch (error) {
+
+                }
+            }
+        };
+
+        const sendGetRequest = async (form) => {
+            const url = form.getAttribute('action');
+            const method = form.getAttribute('method');
+
+            const title = form.querySelector('#titleField').value;
+            const author = form.querySelector('#authorField').value;
+
+            // url encoded
+            let urlData = `${url}?title=${title}&author=${author}`;
+
+            const response = await fetch(urlData, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+            });
+
+            handleContent(response);
+        };
+
+        const init = () => {
+            const titleAuthorForm = document.querySelector('#titleAuthorForm');
+
+            const searchTitleAuthor = (e) => {
+                e.preventDefault();
+                sendGetRequest(titleAuthorForm);
+                return false;
+            }
+
+            titleAuthorForm.addEventListener('submit', searchTitleAuthor);
+        };
+
+        window.onload = init;
+    </script>
 </head>
+
 <body>
     <h1>Client Page</h1>
+
+    <h1>/getByTitleAuthor</h1>
+    <form id="titleAuthorForm" action="/getByTitleAuthor" method="get">
+        <label for="title">Title: </label>
+        <input id="titleField" type="text" title="title" />
+        <label for="author">Author: </label>
+        <input id="authorField" type="text" title="author" />
+        <input type="submit" value="Search">
+    </form>
+    <hr>
+
+    <section id="content">
+    </section>
 </body>
+
 </html>
