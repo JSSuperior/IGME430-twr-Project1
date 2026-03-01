@@ -50,17 +50,38 @@
             }
         };
 
-        const sendGetRequest = async (form) => {
+        const sendGetRequest = async (form, params) => {
+            // unsure if needed, could prob hardcode
             const url = form.getAttribute('action');
             const method = form.getAttribute('method');
 
-            const title = form.querySelector('#titleField').value;
-            const author = form.querySelector('#authorField').value;
+            let newUrl = `${url}?`;
+
+            for (let i = 0; i < params.length; i++) {
+                // if this isn't the first item, add an &
+                if (i > 0) {
+                    newUrl += '&';
+                }
+
+                // if the parameter is a string, format it properly
+                let paramValue = params[i].field.value;
+                if (typeof paramValue === 'string') {
+                    paramValue = paramValue.replace(/\s/g, '').toLowerCase();
+                }
+
+                // add query to url
+                newUrl += `${params[i].name}=${paramValue}`;
+            }
+
+            console.log(newUrl);
+
+            //const title = form.querySelector('#titleField').value;
+            //const author = form.querySelector('#authorField').value;
 
             // url encoded
-            let urlData = `${url}?title=${title}&author=${author}`;
+            //let newUrl = `${url}?title=${title}&author=${author}`;
 
-            const response = await fetch(urlData, {
+            const response = await fetch(newUrl, {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -73,14 +94,54 @@
 
         const init = () => {
             const titleAuthorForm = document.querySelector('#titleAuthorForm');
+            const genreForm = document.querySelector('#genreForm');
+            const yearForm = document.querySelector('#yearForm');
+            const getAllForm = document.querySelector('#getAllForm');
 
             const searchTitleAuthor = (e) => {
                 e.preventDefault();
-                sendGetRequest(titleAuthorForm);
+
+                // create parameter list
+                const paramList = [];
+                paramList[0] = { name: 'title', field: titleAuthorForm.querySelector('.titleField') };
+                paramList[1] = { name: 'author', field: titleAuthorForm.querySelector('.authorField') };
+
+                sendGetRequest(titleAuthorForm, paramList);
+                return false;
+            }
+
+            const searchGenre = (e) => {
+                e.preventDefault();
+
+                const paramList = [];
+                paramList[0] = { name: 'genre', field: genreForm.querySelector('.genreField') }
+
+                sendGetRequest(genreForm, paramList);
+                return false;
+            }
+
+            const searchYear = (e) => {
+                e.preventDefault();
+
+                const paramList = [];
+                paramList[0] = { name: 'yearMin', field: yearForm.querySelector('.yearMinField') };
+                paramList[1] = { name: 'yearMax', field: yearForm.querySelector('.yearMaxField') };
+
+                sendGetRequest(yearForm, paramList);
+                return false;
+            }
+
+            const getAll = (e) => {
+                e.preventDefault();
+                const paramList = [];
+                sendGetRequest(getAllForm, paramList);
                 return false;
             }
 
             titleAuthorForm.addEventListener('submit', searchTitleAuthor);
+            genreForm.addEventListener('submit', searchGenre);
+            yearForm.addEventListener('submit', searchYear);
+            getAllForm.addEventListener('submit', getAll);
         };
 
         window.onload = init;
@@ -90,12 +151,39 @@
 <body>
     <h1>Client Page</h1>
 
-    <h1>/getByTitleAuthor</h1>
+    <h1>/getByTitleAuthor (GET)</h1>
     <form id="titleAuthorForm" action="/getByTitleAuthor" method="get">
         <label for="title">Title: </label>
-        <input id="titleField" type="text" title="title" />
+        <input class="titleField" type="text" name="title" />
         <label for="author">Author: </label>
-        <input id="authorField" type="text" title="author" />
+        <input class="authorField" type="text" name="author" />
+        <input type="submit" value="Search">
+    </form>
+    <hr>
+
+    <h1>/getByGenre (GET)</h1>
+    <form id="genreForm" action="/getByGenre" method="get">
+        <label for="genre">Genre: </label>
+        <input class="genreField" type="text" name="genre">
+        <input type="submit" value="Search">
+    </form>
+    <hr>
+
+    <!-- Got some help for inline js for updating the label from here: https://stackoverflow.com/questions/15195449/html5-type-range-showing-label -->
+    <h1>/getByYear (GET)</h1>
+    <form id="yearForm" action="/getByYear" method="get">
+        <label id="yearMinLabel" for="yearMin">Lower bound (Gregorian Calender): -1700</label>
+        <input class="yearMinField" type="range" name="yearMin" min="-1700" max="2000" value="-1700" step="100"
+            oninput="document.querySelector('#yearMinLabel').innerHTML = `Lower bound (Gregorian Calender): ${this.value}`">
+        <label id="yearMaxLabel" for="yearMax">Upper bound (Gregorian Calender): 2000</label>
+        <input class="yearMaxField" type="range" name="yearMax" min="-1700" max="2000" value="2000" step="100"
+            oninput="document.querySelector('#yearMaxLabel').innerHTML = `Upper bound (Gregorian Calender): ${this.value}`">
+        <input type="submit" value="Search">
+    </form>
+    <hr>
+
+    <h1>/getAllEntries (GET)</h1>
+    <form id="getAllForm" action="/getAllEntries" method="get">
         <input type="submit" value="Search">
     </form>
     <hr>
