@@ -31,6 +31,7 @@
                     break;
             }
 
+            // Handle response body if not head
             if (parseResponse !== 'head') {
                 try {
                     let responseObj = await response.json();
@@ -44,40 +45,39 @@
                         content.innerHTML += `<p>${jsonString}</p>`;
                     }
 
-                } catch (error) {
-
-                }
+                } catch (error) { }
             }
         };
 
         const sendGetRequest = async (form, params) => {
-            // unsure if needed, could prob hardcode
             const url = form.getAttribute('action');
             const method = form.querySelector('.methodField').value;
 
+            // Assemble queries
             let newUrl = url;
 
-            // if there are params, add the starter
+            // If there are params, add the starter
             if (params.length > 0) {
                 newUrl += `?`;
             }
 
             for (let i = 0; i < params.length; i++) {
-                // if this isn't the first item, add an &
+                // If this isn't the first item, add an &
                 if (i > 0) {
                     newUrl += '&';
                 }
 
-                // if the parameter is a string, format it properly
+                // If the parameter is a string, format it properly
                 let paramValue = params[i].field.value;
                 if (typeof paramValue === 'string') {
                     paramValue = paramValue.replace(/\s/g, '').toLowerCase();
                 }
 
-                // add query to url
+                // Add query to url
                 newUrl += `${params[i].name}=${paramValue}`;
             }
 
+            // Send request
             const response = await fetch(newUrl, {
                 method: method,
                 headers: {
@@ -94,40 +94,39 @@
             const method = form.getAttribute('method');
             const dataType = form.querySelector('.dataType').value;
 
-            // default to url encoded
+            // Default to url encoded
             let data = '';
             for (let i = 0; i < params.length; i++) {
-                // if this isn't the first item, add an &
+                // If this isn't the first item, add an &
                 if (i > 0) {
                     data += '&';
                 }
 
-                // if the parameter is a string, format it properly
+                // If the parameter is a string, format it properly
                 let paramValue = params[i].field.value;
                 if (typeof paramValue === 'string') {
                     paramValue = paramValue.replace(/\s/g, '');
                 }
 
-                // add query to url
+                // Add query to url
                 data += `${params[i].name}=${paramValue}`;
             }
 
-            // if data is json format it
+            // If data is json format it
             if (dataType === 'application/json') {
                 data = {};
-                for(let i = 0; i < params.length; i++) {
+                for (let i = 0; i < params.length; i++) {
                     data[params[i].name] = params[i].field.value;
                 }
                 data = JSON.stringify(data);
             }
 
-            console.log(dataType);
-
+            // Send request
             const response = await fetch(url, {
                 method: method,
                 headers: {
                     'Content-Type': dataType,
-                    'Content-Length' : data.length,
+                    'Content-Length': data.length,
                     'Accept': 'application/json',
                 },
                 body: data,
@@ -137,21 +136,20 @@
         }
 
         const setup = () => {
-            // get request forms
+            // Get request forms
             const titleAuthorForm = document.querySelector('#titleAuthorForm');
             const genreForm = document.querySelector('#genreForm');
             const yearForm = document.querySelector('#yearForm');
             const getAllForm = document.querySelector('#getAllForm');
 
-            // post request forms
+            // Post request forms
             const addBookForm = document.querySelector('#addBookForm');
             const addRatingForm = document.querySelector('#ratingForm');
 
-            // get request methods
+            // Get request methods
             const searchTitleAuthor = (e) => {
                 e.preventDefault();
 
-                // create parameter list
                 const paramList = [];
                 paramList[0] = { name: 'title', field: titleAuthorForm.querySelector('.titleField') };
                 paramList[1] = { name: 'author', field: titleAuthorForm.querySelector('.authorField') };
@@ -188,7 +186,7 @@
                 return false;
             }
 
-            // post request methods
+            // Post request methods
             const addBook = (e) => {
                 e.preventDefault();
 
@@ -212,7 +210,7 @@
                 return false;
             }
 
-            // assigning events
+            // Assigning events
             titleAuthorForm.addEventListener('submit', searchTitleAuthor);
             genreForm.addEventListener('submit', searchGenre);
             yearForm.addEventListener('submit', searchYear);
@@ -291,8 +289,9 @@
         <input class="titleField" type="text" name="title" />
         <label for="author">Author: </label>
         <input class="authorField" type="text" name="author" />
-        <label for="year">Year (Gregorian): </label>
-        <input class="yearField" type="text" name="year" />
+        <label id="yearLabel" for="year">Year (Gregorian): 2000</label>
+        <input class="yearField" type="range" name="year" min="-2000" max="2100" value="2000" step="1"
+            oninput="document.querySelector('#yearLabel').innerHTML = `Year (Gregorian Calender): ${this.value}`">
         <label for="genre">Genre: </label>
         <input class="genreField" type="text" name="genre" />
         <select class="dataType" name="dataType">

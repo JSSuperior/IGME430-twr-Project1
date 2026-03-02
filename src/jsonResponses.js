@@ -1,7 +1,5 @@
 // additional help from
 // https://stackoverflow.com/questions/6623231/remove-all-white-spaces-from-text
-// Need to refactor code later, right now focusing on functionality
-// I'll probably 
 
 // Requirements/files
 const fs = require('fs');
@@ -13,10 +11,9 @@ let data;
 // Loads json data into local memory
 const loadJSON = () => {
     data = JSON.parse(initialData);
-    //console.log(data);
-    //console.log(data[0]);
 };
 
+// General purpose response
 const respond = (request, response, statusCode, object) => {
     const content = JSON.stringify(object);
 
@@ -47,20 +44,17 @@ const getByTitleAuthor = (request, response) => {
     }
     let statusCode = 404;
 
-    // Go through data and check if a book with a certain title
-    for (let i = 0; i < data.length; i++) {
-        if (data[i]['title'].replace(/\s/g, '').toLowerCase() === request.query.title && data[i]['author'].replace(/\s/g, '').toLowerCase() === request.query.author) {
-            statusCode = 200;
-            responseJSON = data[i];
-        }
+    // Look for book with specific title and author and return if found
+    const desiredBook = data.find((element) => { return element['title'].replace(/\s/g, '').toLowerCase() === request.query.title.toLowerCase() && element['author'].replace(/\s/g, '').toLowerCase() === request.query.author.toLowerCase(); })
+    if (desiredBook) {
+        statusCode = 200;
+        responseJSON = desiredBook;
     }
 
     return respond(request, response, statusCode, responseJSON);
 };
 
-// 
-// Returns book titles that have specific genre
-// later on, might change to search for multiple at a time
+// Returns books from specified genre
 const getByGenre = (request, response) => {
     // If missing query return bad request
     if (!request.query.genre) {
@@ -74,26 +68,8 @@ const getByGenre = (request, response) => {
     }
     let statusCode = 404;
 
-    // http://127.0.0.1:3000/getByGenre?genre=Modernism
-    // Go through data and check if books with a certain genre exist and add them to a lsit
-    let booksWithGenre = [];
-
-    for (let i = 0; i < data.length; i++) {
-        if (data[i]['genres']) {
-            for (let j = 0; j < data[i]['genres'].length; j++) {
-                //console.log(data[i]['genres'][j].replace(/\s/g, ''));
-                if (data[i]['genres'][j].replace(/\s/g, '').toLowerCase() === request.query.genre) {
-                    let bookStruct = {};
-
-                    bookStruct.title = data[i]['title'];
-                    bookStruct.author = data[i]['author'];
-                    bookStruct.link = data[i]['link'];
-
-                    booksWithGenre.push(bookStruct);
-                }
-            }
-        }
-    }
+    // Go through data and check if books with a certain genre exist and add them to a list
+    const booksWithGenre = data.filter((element) => { if (element['genres']) { return element['genres'].find((genre) => { return genre.replace(/\s/g, '').toLowerCase() === request.query.genre.toLowerCase() }) } });
 
     // If books with specific genre exist, send the titles
     if (booksWithGenre.length > 0) {
@@ -104,8 +80,7 @@ const getByGenre = (request, response) => {
     return respond(request, response, statusCode, responseJSON);
 };
 
-// http://127.0.0.1:3000/getByYear?yearMin=1700&yearMax=2000
-// Gets books in a range of years
+// Gets book titles in a range of years
 const getByYear = (request, response) => {
     // If missing query return bad request
     if (!request.query.yearMin || !request.query.yearMax) {
@@ -119,14 +94,8 @@ const getByYear = (request, response) => {
     }
     let statusCode = 404;
 
-    // Go through data and check if books with a certain genre exist and add them to a lsit
-    let booksWithYear = [];
-    for (let i = 0; i < data.length; i++) {
-        //console.log(data[i]['genres'][j].replace(/\s/g, ''));
-        if (data[i]['year'] >= request.query.yearMin && data[i]['year'] <= request.query.yearMax) {
-            booksWithYear.push(data[i]['title']);
-        }
-    }
+    // Go through data and check if books within time range exist and add their titles to a list
+    let booksWithYear = data.filter((element) => { return element['year'] >= request.query.yearMin && element['year'] <= request.query.yearMax }).map((book) => { return book['title'] });
 
     // If books within specified time range exist, send the titles
     if (booksWithYear.length > 0) {
@@ -146,73 +115,80 @@ const getAllEntries = (request, response) => {
 };
 
 const addBook = (request, response) => {
-    // needs title, author, year and genres
+    // Needs title, author, year and genres
     const responseJSON = {
         message: 'Title, author, year and genre are required.',
     };
     let statusCode = 400;
 
-    console.log(request.body);
+    // Missing params
     const { title, author, year, genre } = request.body;
     if (!title || !author || !year || !genre) {
         responseJSON.id = 'addBookMissingParams';
         return respond(request, response, statusCode, responseJSON);
     }
-
     statusCode = 201;
 
-    for (let i = 0; i < data.length; i++) {
-        if (data[i]['title'].replace(/\s/g, '').toLowerCase() === title.toLowerCase()) {
-            statusCode = 204;
-            data[i]['title'] = title;
-            data[i]['author'] = author;
-            data[i]['year'] = year;
-            data[i]['genres'] = {genre};
-        }
+    // If book exists, update it's info
+    const existingBook = data.find((element) => {return element['title'].replace(/\s/g, '').toLowerCase() === title.toLowerCase()});
+    if(existingBook) {
+        statusCode = 204;
+        existingBook['title'] = title;
+        existingBook['author'] = author;
+        existingBook['year'] = parseInt(year);
+        existingBook['genres'] = [genre];
     }
 
+    // If book doesn't exist, create a new entry
     if (statusCode === 201) {
         const newBook = {};
 
         newBook.title = title;
         newBook.author = author;
-        newBook.year = year;
-        newBook.genre = genre;
+        newBook.year = parseInt(year);
+        newBook.genres = [genre];
 
         data.push(newBook);
+        updateFile();
         responseJSON.message = 'New Book Entry Created';
         return respond(request, response, statusCode, responseJSON);
     }
+
+    updateFile();
     return respond(request, response, statusCode, {});
 }
 
 // Adds a new field to book entries
 const addRating = (request, response) => {
-    // needs rating out of 5
+    // Needs title and rating out of 5
     const responseJSON = {
         message: 'Name and rating is required.',
     };
     let statusCode = 400;
 
+    // Missing params return early
     const { title, rating } = request.body;
     if (!title || !rating) {
         responseJSON.id = 'addRatingMissingParams';
         return respond(request, response, statusCode, responseJSON);
     }
-
     statusCode = 404;
-    for (let i = 0; i < data.length; i++) {
-        if (data[i]['title'].replace(/\s/g, '').toLowerCase() === title.toLowerCase()) {
-            statusCode = 204;
-            data[i]['rating'] = rating;
-        }
+
+    // If book exists, add rating to it
+    const existingBook = data.find((element) => {return element['title'].replace(/\s/g, '').toLowerCase() === title.toLowerCase()});
+    if(existingBook) {
+        statusCode = 204;
+        existingBook['rating'] = parseInt(rating);
     }
 
+    // If book doesn't exist, return not found
     if (statusCode === 404) {
         responseJSON.id = 'titleNotFound';
         responseJSON.message = 'Title of book was not found.';
         return respond(request, response, statusCode, responseJSON);
     }
+
+    updateFile();
     return respond(request, response, statusCode, responseJSON);
 }
 
@@ -227,6 +203,7 @@ const notFound = (request, response) => {
     return respond(request, response, statusCode, responseJSON);
 };
 
+// General Bad Request
 const badRequest = (request, response) => {
     const responseJSON = {};
     const statusCode = 400;
@@ -234,6 +211,18 @@ const badRequest = (request, response) => {
     responseJSON.id = 'badRequest';
     responseJSON.message = 'Missing valid query parameter.';
     return respond(request, response, statusCode, responseJSON);
+}
+
+// Write to file for data persistance
+// https://nodejs.org/en/learn/manipulating-files/writing-files-with-nodejs
+const updateFile = () => {
+    const formattedData = JSON.stringify(data);
+
+    try {
+        fs.writeFileSync(`${__dirname}/../data/books.json`, formattedData);
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 module.exports = {

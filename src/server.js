@@ -8,7 +8,6 @@ const htmlHandler = require('./htmlResponses.js');
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 // URLs
-// need to find better names based on what they return
 const urlStruct = {
     '/': htmlHandler.getClient,
     '/style.css': htmlHandler.getCSS,
@@ -26,11 +25,10 @@ const onRequest = (request, response) => {
     const protocol = request.connection.encrypted ? 'https' : 'http';
     const parsedUrl = new URL(request.url, `${protocol}://${request.headers.host}`);
 
-    // Split queries and accepted types
-    //request.acceptedTypes = request.headers.accept.split(',');
+    // Split queries
     request.query = Object.fromEntries(parsedUrl.searchParams);
 
-    // Url request logic, might be kinda funky but hopefully refined from assignment 2
+    // If url exists, handle it depending on method type
     if (urlStruct[parsedUrl.pathname]) {
         if (request.method === 'POST') {
             return parseBody(request, response, urlStruct[parsedUrl.pathname]);
@@ -61,8 +59,6 @@ const parseBody = (request, response, handler) => {
 
     // Once all packets recieved handle data
     request.on('end', () => {
-        console.log(body);
-
         const bodyString = Buffer.concat(body).toString();
         const type = request.headers['content-type'];
 
