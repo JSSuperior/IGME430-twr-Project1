@@ -34,9 +34,9 @@ const onRequest = (request, response) => {
     if (urlStruct[parsedUrl.pathname]) {
         if (request.method === 'POST') {
             return parseBody(request, response, urlStruct[parsedUrl.pathname]);
-        } else if (request.method === 'GET') {
+        } else if (request.method === 'GET' || request.method === 'HEAD') {
             return urlStruct[parsedUrl.pathname](request, response);
-        }
+        } 
     }
     return urlStruct.notFound(request, response);
 };
@@ -61,7 +61,8 @@ const parseBody = (request, response, handler) => {
 
     // Once all packets recieved handle data
     request.on('end', () => {
-        // Unsure if content-type needs to be uppercase
+        console.log(body);
+
         const bodyString = Buffer.concat(body).toString();
         const type = request.headers['content-type'];
 

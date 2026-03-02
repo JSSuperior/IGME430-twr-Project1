@@ -121,14 +121,6 @@ const getByYear = (request, response) => {
 
     // Go through data and check if books with a certain genre exist and add them to a lsit
     let booksWithYear = [];
-
-    // for (let book of data) {
-    //     if (book['year'] >= request.query.yearMin
-    //         && book['year'] <= request.query.yearMax) {
-    //         booksWithYear.push(book['title']);
-    //     }
-    // }
-
     for (let i = 0; i < data.length; i++) {
         //console.log(data[i]['genres'][j].replace(/\s/g, ''));
         if (data[i]['year'] >= request.query.yearMin && data[i]['year'] <= request.query.yearMax) {
@@ -156,35 +148,26 @@ const getAllEntries = (request, response) => {
 const addBook = (request, response) => {
     // needs title, author, year and genres
     const responseJSON = {
-        message: 'Title, author, year and genres are required.',
+        message: 'Title, author, year and genre are required.',
     };
     let statusCode = 400;
 
-    const { title, author, year, genres } = request.body;
-    if (!title || !author || !year || !genres) {
+    console.log(request.body);
+    const { title, author, year, genre } = request.body;
+    if (!title || !author || !year || !genre) {
         responseJSON.id = 'addBookMissingParams';
         return respond(request, response, statusCode, responseJSON);
     }
 
     statusCode = 201;
-    // im sure that there is a better ay to search, need to do more research
-    // for (let book of data) {
-    //     if (book['title'].replace(/\s/g, '').toLowerCase() === title.replace(/\s/g, '').toLowerCase()) {
-    //         statusCode = 204;
-    //         book['title'] = title;
-    //         book['author'] = author;
-    //         book['year'] = year;
-    //         book['genres'] = genres;
-    //     }
-    // }
 
     for (let i = 0; i < data.length; i++) {
-        if (data[i]['title'].replace(/\s/g, '').toLowerCase() === title.replace(/\s/g, '').toLowerCase()) {
+        if (data[i]['title'].replace(/\s/g, '').toLowerCase() === title.toLowerCase()) {
             statusCode = 204;
             data[i]['title'] = title;
             data[i]['author'] = author;
             data[i]['year'] = year;
-            data[i]['genres'] = genres;
+            data[i]['genres'] = {genre};
         }
     }
 
@@ -194,7 +177,7 @@ const addBook = (request, response) => {
         newBook.title = title;
         newBook.author = author;
         newBook.year = year;
-        newBook.genres = genres;
+        newBook.genre = genre;
 
         data.push(newBook);
         responseJSON.message = 'New Book Entry Created';
@@ -219,7 +202,7 @@ const addRating = (request, response) => {
 
     statusCode = 404;
     for (let i = 0; i < data.length; i++) {
-        if (data[i]['title'].replace(/\s/g, '').toLowerCase === title.replace(/\s/g, '').toLowerCase()) {
+        if (data[i]['title'].replace(/\s/g, '').toLowerCase() === title.toLowerCase()) {
             statusCode = 204;
             data[i]['rating'] = rating;
         }

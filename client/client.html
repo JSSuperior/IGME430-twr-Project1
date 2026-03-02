@@ -53,9 +53,14 @@
         const sendGetRequest = async (form, params) => {
             // unsure if needed, could prob hardcode
             const url = form.getAttribute('action');
-            const method = form.getAttribute('method');
+            const method = form.querySelector('.methodField').value;
 
-            let newUrl = `${url}?`;
+            let newUrl = url;
+
+            // if there are params, add the starter
+            if (params.length > 0) {
+                newUrl += `?`;
+            }
 
             for (let i = 0; i < params.length; i++) {
                 // if this isn't the first item, add an &
@@ -73,14 +78,6 @@
                 newUrl += `${params[i].name}=${paramValue}`;
             }
 
-            console.log(newUrl);
-
-            //const title = form.querySelector('#titleField').value;
-            //const author = form.querySelector('#authorField').value;
-
-            // url encoded
-            //let newUrl = `${url}?title=${title}&author=${author}`;
-
             const response = await fetch(newUrl, {
                 method: method,
                 headers: {
@@ -89,15 +86,68 @@
                 },
             });
 
-            handleContent(response);
+            handleContent(response, method);
         };
 
-        const init = () => {
+        const sendPostRequest = async (form, params) => {
+            const url = form.getAttribute('action');
+            const method = form.getAttribute('method');
+            const dataType = form.querySelector('.dataType').value;
+
+            // default to url encoded
+            let data = '';
+            for (let i = 0; i < params.length; i++) {
+                // if this isn't the first item, add an &
+                if (i > 0) {
+                    data += '&';
+                }
+
+                // if the parameter is a string, format it properly
+                let paramValue = params[i].field.value;
+                if (typeof paramValue === 'string') {
+                    paramValue = paramValue.replace(/\s/g, '');
+                }
+
+                // add query to url
+                data += `${params[i].name}=${paramValue}`;
+            }
+
+            // if data is json format it
+            if (dataType === 'application/json') {
+                data = {};
+                for(let i = 0; i < params.length; i++) {
+                    data[params[i].name] = params[i].field.value;
+                }
+                data = JSON.stringify(data);
+            }
+
+            console.log(dataType);
+
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': dataType,
+                    'Content-Length' : data.length,
+                    'Accept': 'application/json',
+                },
+                body: data,
+            });
+
+            handleContent(response, method);
+        }
+
+        const setup = () => {
+            // get request forms
             const titleAuthorForm = document.querySelector('#titleAuthorForm');
             const genreForm = document.querySelector('#genreForm');
             const yearForm = document.querySelector('#yearForm');
             const getAllForm = document.querySelector('#getAllForm');
 
+            // post request forms
+            const addBookForm = document.querySelector('#addBookForm');
+            const addRatingForm = document.querySelector('#ratingForm');
+
+            // get request methods
             const searchTitleAuthor = (e) => {
                 e.preventDefault();
 
@@ -138,10 +188,41 @@
                 return false;
             }
 
+            // post request methods
+            const addBook = (e) => {
+                e.preventDefault();
+
+                const paramList = [];
+                paramList[0] = { name: 'title', field: addBookForm.querySelector('.titleField') };
+                paramList[1] = { name: 'author', field: addBookForm.querySelector('.authorField') };
+                paramList[2] = { name: 'year', field: addBookForm.querySelector('.yearField') };
+                paramList[3] = { name: 'genre', field: addBookForm.querySelector('.genreField') };
+
+                sendPostRequest(addBookForm, paramList);
+                return false;
+            }
+
+            const addRating = (e) => {
+                e.preventDefault();
+                const paramList = [];
+                paramList[0] = { name: 'title', field: addRatingForm.querySelector('.titleField') };
+                paramList[1] = { name: 'rating', field: addRatingForm.querySelector('.ratingField') };
+
+                sendPostRequest(addRatingForm, paramList);
+                return false;
+            }
+
+            // assigning events
             titleAuthorForm.addEventListener('submit', searchTitleAuthor);
             genreForm.addEventListener('submit', searchGenre);
             yearForm.addEventListener('submit', searchYear);
             getAllForm.addEventListener('submit', getAll);
+            addBookForm.addEventListener('submit', addBook);
+            addRatingForm.addEventListener('submit', addRating);
+        }
+
+        const init = () => {
+            setup();
         };
 
         window.onload = init;
@@ -157,6 +238,10 @@
         <input class="titleField" type="text" name="title" />
         <label for="author">Author: </label>
         <input class="authorField" type="text" name="author" />
+        <select class="methodField" name="method">
+            <option value="get">GET</option>
+            <option value="head">HEAD</option>
+        </select>
         <input type="submit" value="Search">
     </form>
     <hr>
@@ -165,6 +250,10 @@
     <form id="genreForm" action="/getByGenre" method="get">
         <label for="genre">Genre: </label>
         <input class="genreField" type="text" name="genre">
+        <select class="methodField" name="method">
+            <option value="get">GET</option>
+            <option value="head">HEAD</option>
+        </select>
         <input type="submit" value="Search">
     </form>
     <hr>
@@ -172,19 +261,60 @@
     <!-- Got some help for inline js for updating the label from here: https://stackoverflow.com/questions/15195449/html5-type-range-showing-label -->
     <h1>/getByYear (GET)</h1>
     <form id="yearForm" action="/getByYear" method="get">
-        <label id="yearMinLabel" for="yearMin">Lower bound (Gregorian Calender): -1700</label>
+        <label id="yearMinLabel" for="yearMin">Lower bound (Gregorian): -1700</label>
         <input class="yearMinField" type="range" name="yearMin" min="-1700" max="2000" value="-1700" step="100"
             oninput="document.querySelector('#yearMinLabel').innerHTML = `Lower bound (Gregorian Calender): ${this.value}`">
-        <label id="yearMaxLabel" for="yearMax">Upper bound (Gregorian Calender): 2000</label>
+        <label id="yearMaxLabel" for="yearMax">Upper bound (Gregorian): 2000</label>
         <input class="yearMaxField" type="range" name="yearMax" min="-1700" max="2000" value="2000" step="100"
             oninput="document.querySelector('#yearMaxLabel').innerHTML = `Upper bound (Gregorian Calender): ${this.value}`">
+        <select class="methodField" name="method">
+            <option value="get">GET</option>
+            <option value="head">HEAD</option>
+        </select>
         <input type="submit" value="Search">
     </form>
     <hr>
 
     <h1>/getAllEntries (GET)</h1>
     <form id="getAllForm" action="/getAllEntries" method="get">
+        <select class="methodField" name="method">
+            <option value="get">GET</option>
+            <option value="head">HEAD</option>
+        </select>
         <input type="submit" value="Search">
+    </form>
+    <hr>
+
+    <h1>/addBook (POST)</h1>
+    <form id="addBookForm" action="/addBook" method="post">
+        <label for="title">Title: </label>
+        <input class="titleField" type="text" name="title" />
+        <label for="author">Author: </label>
+        <input class="authorField" type="text" name="author" />
+        <label for="year">Year (Gregorian): </label>
+        <input class="yearField" type="text" name="year" />
+        <label for="genre">Genre: </label>
+        <input class="genreField" type="text" name="genre" />
+        <select class="dataType" name="dataType">
+            <option value="application/x-www-form-urlencoded">URL Encoded</option>
+            <option value="application/json">JSON</option>
+        </select>
+        <input type="submit" value="Submit">
+    </form>
+    <hr>
+
+    <h1>/addRating (POST)</h1>
+    <form id="ratingForm" action="/addRating" method="post">
+        <label for="title">Title: </label>
+        <input class="titleField" type="text" name="title" />
+        <label id="ratingLabel" for="rating">Rating: 3/5</label>
+        <input class="ratingField" type="range" name="rating" min="0" max="5" value="3" step="1"
+            oninput="document.querySelector('#ratingLabel').innerHTML = `Rating: ${this.value}/5`">
+        <select class="dataType" name="dataType">
+            <option value="application/x-www-form-urlencoded">URL Encoded</option>
+            <option value="application/json">JSON</option>
+        </select>
+        <input type="submit" value="Submit">
     </form>
     <hr>
 
