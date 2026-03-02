@@ -10,7 +10,7 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 // URLs
 const urlStruct = {
     '/': htmlHandler.getClient,
-    '/style.css': htmlHandler.getCSS,
+    '/documentation': htmlHandler.getDocumentation,
     '/getByTitleAuthor': jsonHandler.getByTitleAuthor,
     '/getByGenre': jsonHandler.getByGenre,
     '/getByYear': jsonHandler.getByYear,

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Document</title>
+</head>
+
+<body>
+    <a href="/">View API Client</a>
+    <a href="/documentation">View Documentation</a>
+
+    <h1>Documentation</h1>
+
+    <h2>/getByTitleAuthor</h2>
+    <p>
+        <b>Supported Methods:</b> GET, HEAD <br>
+        <b>Query Params:</b> Title (String, Required), Author (String, Required) <br>
+        <b>Returns:</b> JSON object with all data about book <br>
+        <b>Example Usage:</b> <br>
+        Request: /api/getByTitleAuthor?title=schmingledork&author=johnny <br>
+        Result: {"title":"SchmingleDork","author":"Johnny","year":343...}
+    </p>
+    <br>
+
+    <h2>/getByGenre</h2>
+    <p>
+        <b>Supported Methods:</b> GET, HEAD <br>
+        <b>Query Param:</b> Genre (String, Required)<br>
+        <b>Returns:</b> List of JSON objects with book info<br>
+        <b>Example Usage:</b> <br>
+        Request: /api/getByGenre?genre=classicliterature<br>
+        Result: {"booksWithGenre":[{"author":"Jane Austen","country":"United Kingdom"...}...]}
+    </p>
+    <br>
+
+    <h2>/getByYear</h2>
+    <p>
+        <b>Supported Methods:</b> GET, HEAD <br>
+        <b>Query Params:</b> Lower Year (Int, Required), Upper Year (Int, Required) <br>
+        <b>Returns:</b> List of book titles <br>
+        <b>Example Usage:</b> <br>
+        Request: /api/getByYear?yearMin=-300&yearMax=2000<br>
+        Result: {"booksWithYear":["The Divine Comedy","The Book Of Job","One Thousand and One Nights"...]}
+    </p>
+    <br>
+
+    <h2>/getAllEntries</h2>
+    <p>
+        <b>Supported Methods:</b> GET, HEAD <br>
+        <b>Query Param:</b> None<br>
+        <b>Returns:</b> List of all JSON objects with book info<br>
+        <b>Example Usage:</b> <br>
+        Request: /api/getAllEntries<br>
+        Result: {"data":[{"author":"Chinua Achebe","country":"Nigeria","language":"English"...}...]}
+    </p>
+    <br>
+
+    <h2>/addBook</h2>
+    <p>
+        <b>Supported Methods:</b> POST <br>
+        <b>Body Param:</b> Title (String, Required), Author (String, Required), Year (Int, Required), Genre (String, Required)<br>
+        <b>Creates:</b> An object that has basic info about a book<br>
+        <b>Example Usage:</b> <br>
+        Request: /api/addBook<br>
+        Body: {title: 'MyCoolTitle', author: 'Me!', year: 204, genre: 'Modernism'}<br>
+        Result: {"title":"MyCoolTitle","author":"Me!","year":204,"genres":["Modernism"]}
+    </p>
+    <br>
+
+    <h2>/addRating</h2>
+    <p>
+        <b>Supported Methods:</b> POST <br>
+        <b>Body Param:</b> Title (String, Required), Rating (Int, Required)<br>
+        <b>Creates:</b> Adds an object property to an existing object<br>
+        <b>Example Usage:</b> <br>
+        Request: /api/addRating<br>
+        Body: {title: 'MyCoolTitle', rating: 3}<br>
+        Result: {"title":"MyCoolTitle","author":"Me!","year":204,"genres":["Modernism"],"rating":3}
+    </p>
+    <br>
+
+</body>
+
+</html>
